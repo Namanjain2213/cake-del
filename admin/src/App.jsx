@@ -8,7 +8,7 @@ import {Routes,Route} from 'react-router-dom'
 import { ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 const App = () => {
-  const url = "https://cake-del.onrender.com" // add backend deploy url here
+  const url = "https://cake-del.onrender.com" 
   return (
     <div>
       <ToastContainer />
