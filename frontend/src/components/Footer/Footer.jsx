@@ -17,8 +17,12 @@ function Footer() {
                 <a><FaFacebookF /></a>
                 <a id='insta'><FaInstagram/></a>
             </div>
+            <div className="footer-icons addre">
+                <p>Our Contact No : <span>6264339006</span></p>
+                <p>Our Mail id : <span>nakodacake@gmail.com</span> </p>
+            </div>
             <aside className="footer-copyright">
-                <p>Copyright © {new Date().getFullYear()} - All rights reserved by ACME Industries Ltd</p>
+                <p>Copyright © {new Date().getFullYear()} - All rights reserved by Nakoda cake</p>
             </aside>
         </footer>
     );

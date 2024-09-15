@@ -47,7 +47,9 @@
     font-size: 14px;
     margin-top: 20px;
 }
-
+.footer-icons span{
+    color: blue;
+}
 @media (max-width: 768px) {
     .footer-nav {
         flex-direction: column;
@@ -60,6 +62,9 @@
 
     .footer {
         padding: 30px 15px;
+    }
+    .addre{
+        flex-direction: column;
     }
 }
 
