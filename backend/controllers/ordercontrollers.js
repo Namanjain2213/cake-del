@@ -4,6 +4,7 @@ import Stripe from "stripe";
 import 'dotenv/config';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const FRONTEND_URL = "https://cake-del.vercel.app";
 
 const placeorder = async (req, res) => {
     try {
@@ -41,8 +42,8 @@ const placeorder = async (req, res) => {
             payment_method_types: ['card'],
             line_items,
             mode: 'payment',
-            success_url: `${process.env.FRONTEND_URL}/verify?success=true&orderId=${neworder._id}`,
-            cancel_url: `${process.env.FRONTEND_URL}/verify?success=false&orderId=${neworder._id}`
+            success_url: `${FRONTEND_URL}/verify?success=true&orderId=${neworder._id}`,
+            cancel_url: `${FRONTEND_URL}/verify?success=false&orderId=${neworder._id}`
         });
 
         console.log('Stripe session created:', session); 
