@@ -6,7 +6,7 @@ export const Storecontext = createContext(null);
 const StoreContextProvider = (props) => {
    const [cartitem, setcartitems] = useState({});
    const [food_list, setfood_list] = useState([]);
-   const url = "http://localhost:4000"; //backend url
+   const url = "https://cake-del.onrender.com"; //backend url
    const [token, settoken] = useState("");
 
    const addtocart = async (itemId) => {
