@@ -3,9 +3,11 @@ import App from './App.jsx'
 import './index.css'
 import {BrowserRouter} from "react-router-dom"
 import StoreContextProvider from './Context/Storecontext.jsx'
+import { Analytics } from "@vercel/analytics/react"
 createRoot(document.getElementById('root')).render(
   <BrowserRouter>
   <StoreContextProvider>
+    <Analytics/>
     <App/>
     </StoreContextProvider>
   </BrowserRouter>

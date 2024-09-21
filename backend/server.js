@@ -1,14 +1,15 @@
 import express from "express";
-import cors from "cors"
+import cors from "cors";
 import { connectDB } from "./config/db.js";
 import foodRouter from "./routes/foodRoutes.js";
 import userRouter from "./routes/User_route.js";
 import cartRouter from "./routes/Cartroute.js";
 import orderRouter from "./routes/orderroute.js";
+import forgetRouter from './routes/forgetroute.js';
+import ResetRouter from './routes/Resetroute.js';
 import 'dotenv/config';
 
-
-const app = express()
+const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
@@ -16,16 +17,16 @@ app.use(cors());
 
 connectDB();
 
-app.use("/api/food",foodRouter);
-app.use("/images",express.static('uploads'))
-app.use("/api/user",userRouter);
-app.use("/api/cart",cartRouter);
-app.use("/api/order",orderRouter);
+app.use("/api/food", foodRouter);
+app.use("/images", express.static('uploads'));
+app.use("/api/user", userRouter);
+app.use("/api/cart", cartRouter);
+app.use("/api/order", orderRouter);
 
-app.get("/",(req,res)=>{
-    res.send("app is running");
-})
+app.get("/", (req, res) => {
+    res.send("App is running");
+});
 
-app.listen(port,()=>{
-    console.log(`app is running on port  ${port}` );
-})
+app.listen(port, () => {
+    console.log(`App is running on port ${port}`);
+});
