@@ -10,6 +10,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Verify from './pages/Verify/Verify';
 import Myorder from './pages/Myorder/Myorder';
+import { Analytics } from "@vercel/analytics/react"
 
 const App = () => {
   const [showlogin, setshowlogin] = useState(false);
@@ -17,6 +18,7 @@ const App = () => {
   return (
     <>
       <ToastContainer />
+      <Analytics/>
       {showlogin ? <Loginpopup setshowlogin={setshowlogin} /> : null}
       <div className='app'>
         <Navbar setshowlogin={setshowlogin} />
