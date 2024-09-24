@@ -1,10 +1,13 @@
+import Razorpay from 'razorpay';
 import ordermodel from "../Models/Order_model.js";
 import userModel from '../Models/User_model.js';
-import Stripe from "stripe";
+import crypto from 'crypto';
 import 'dotenv/config';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-const FRONTEND_URL = "https://cake-del.vercel.app";
+const razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
 
 const placeorder = async (req, res) => {
     try {
@@ -17,128 +20,104 @@ const placeorder = async (req, res) => {
         await neworder.save();
         await userModel.findByIdAndUpdate(req.body.userId, { cartData: {} });
 
-        const line_items = req.body.items.map((item) => ({
-            price_data: {
-                currency: "inr",
-                product_data: {
-                    name: item.name,
-                },
-                unit_amount: item.price * 100,
-            },
-            quantity: item.quantity,
-        }));
-        line_items.push({
-            price_data: {
-                currency: "inr",
-                product_data: {
-                    name: "Delivery charges",
-                },
-                unit_amount: 30 * 100,
-            },
-            quantity: 1,
-        });
+        const options = {
+            amount: req.body.amount * 100, // Amount in paise
+            currency: "INR",
+            receipt: neworder._id.toString(),
+        };
 
-        const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card'],
-            line_items,
-            mode: 'payment',
-            success_url: `${FRONTEND_URL}/verify?success=true&orderId=${neworder._id}`,
-            cancel_url: `${FRONTEND_URL}/verify?success=false&orderId=${neworder._id}`
-        });
-
-        console.log('Stripe session created:', session); 
-
+        const razorpayOrder = await razorpay.orders.create(options);
+        
         res.json({
             success: true,
-            session_url: session.url
+            razorpay_order_id: razorpayOrder.id,
+            orderId: neworder._id,
         });
     } catch (err) {
-        console.error('Error placing order:', err); 
+        console.error('Error placing order:', err);
         res.status(500).json({
             success: false,
             error: 'Internal Server Error'
         });
     }
 };
-const verifyOrder = async (req, res) => {
 
-    const { orderId, success } = req.body;
+const verifyOrder = async (req, res) => {
     try {
-        if (success == "true") {
-            await ordermodel.findByIdAndUpdate(orderId, { payment: true });
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = req.body;
+        const generatedSignature = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+                                          .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+                                          .digest('hex');
+
+        if (generatedSignature === razorpay_signature) {
+            await ordermodel.findByIdAndUpdate(orderId, { payment: true }, { new: true });
+            
             res.json({
                 success: true,
-                message: "Paid"
-            })
-        }
-        else {
-            await ordermodel.findByIdAndDelete(orderId);
-            res.json({
+                message: "Payment verified successfully",
+            });
+        } else {
+            res.status(400).json({
                 success: false,
-                message: "Not Paid"
-            })
+                message: "Payment verification failed",
+            });
         }
-    }
-    catch (err) {
-        console.error(err);
-        res.json({
+    } catch (err) {
+        console.error('Error verifying payment:', err);
+        res.status(500).json({
             success: false,
             message: "Internal Server Error"
-
-        })
+        });
     }
-}
+};
 
+// Other functions remain the same...
 const userOrder = async (req, res) => {
     try {
         const orders = await ordermodel.find({ userId: req.body.userId });
         res.json({
             success: true,
             data: orders
-        })
-    }
-    catch (err) {
+        });
+    } catch (err) {
         console.error(err);
-        res.json({
+        res.status(500).json({
             success: false,
             message: "Internal Server Error"
-        })
+        });
     }
-}
+};
 
 const listorders = async (req, res) => {
-
     try {
-        const orders = await ordermodel.find({})
+        const orders = await ordermodel.find({});
         res.json({
             success: true,
             data: orders
-        })
-    }
-    catch (err) {
+        });
+    } catch (err) {
         console.error(err);
-        res.json({
+        res.status(500).json({
             success: false,
             message: "Internal Server Error"
-        })
+        });
     }
-}
+};
 
 const updateStatus = async (req, res) => {
     try {
-        await ordermodel.findByIdAndUpdate(req.body.orderId, { status: req.body.status })
+        await ordermodel.findByIdAndUpdate(req.body.orderId, { status: req.body.status });
         res.json({
             success: true,
-            message: "Status Updated "
-        })
-    }
-    catch (err) {
+            message: "Status Updated"
+        });
+    } catch (err) {
         console.error(err);
-        res.json({
+        res.status(500).json({
             success: false,
             message: "Internal Server Error"
-        })
+        });
     }
-}
+};
 
 export { placeorder, verifyOrder, userOrder, listorders, updateStatus };
